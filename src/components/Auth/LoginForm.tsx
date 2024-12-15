@@ -38,7 +38,7 @@ export function LoginForm() {
             <Clock className="w-12 h-12 text-white" />
           </div>
           <h1 className="text-3xl font-bold mt-4 bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
-            TimeTrack Pro
+            Time Tracker
           </h1>
           <p className="text-gray-600 mt-2">Track your work hours efficiently</p>
         </div>

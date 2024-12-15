@@ -1,4 +1,4 @@
-import React from 'react';
+// import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, User, Clock } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
@@ -18,7 +18,7 @@ export function Header() {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-2">
             <Clock className="w-6 h-6 text-white" />
-            <h1 className="text-xl font-bold text-white">TimeTrack Pro</h1>
+            <h1 className="text-xl font-bold text-white">Time Tracker</h1>
           </div>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2 bg-white/10 px-4 py-2 rounded-lg">

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Clock, Plus } from 'lucide-react';
 import { useTimeEntryStore } from '../../store/timeEntryStore';
 import { useAuthStore } from '../../store/authStore';
+import { Notification } from '../common/Notification';
 
 export function ManualEntry() {
   const [hours, setHours] = useState('');
@@ -10,6 +11,7 @@ export function ManualEntry() {
   const [useTimeRange, setUseTimeRange] = useState(false);
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('17:00');
+  const [showNotification, setShowNotification] = useState(false);
   
   const { addManualEntry } = useTimeEntryStore();
   const user = useAuthStore((state) => state.user);
@@ -42,96 +44,108 @@ export function ManualEntry() {
       endTime: useTimeRange ? `${date}T${endTime}:00` : undefined,
     });
 
+    // Reset form
     setHours('');
     setNotes('');
     if (useTimeRange) {
       setStartTime('09:00');
       setEndTime('17:00');
     }
+
+    // Show notification
+    setShowNotification(true);
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md mt-6">
-      <h2 className="text-xl font-semibold flex items-center mb-4">
-        <Clock className="w-6 h-6 mr-2 text-blue-600" />
-        Manual Time Entry
-      </h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Date</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
-            required
-          />
-        </div>
+    <>
+      <div className="bg-white p-6 rounded-lg shadow-md mt-6">
+        <h2 className="text-xl font-semibold flex items-center mb-4">
+          <Clock className="w-6 h-6 mr-2 text-blue-600" />
+          Manual Time Entry
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+              required
+            />
+          </div>
 
-        <div>
+          <div>
+            <button
+              type="button"
+              onClick={() => setUseTimeRange(!useTimeRange)}
+              className="text-sm text-blue-600 hover:text-blue-800 underline mb-2"
+            >
+              {useTimeRange ? 'Enter total hours instead' : 'Set start and end time instead'}
+            </button>
+
+            {useTimeRange ? (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Start Time</label>
+                  <input
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">End Time</label>
+                  <input
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+                    required
+                  />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Hours</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  value={hours}
+                  onChange={(e) => setHours(e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+                  required
+                />
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Notes</label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+              rows={3}
+            />
+          </div>
           <button
-            type="button"
-            onClick={() => setUseTimeRange(!useTimeRange)}
-            className="text-sm text-blue-600 hover:text-blue-800 underline mb-2"
+            type="submit"
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
-            {useTimeRange ? 'Enter total hours instead' : 'Set start and end time instead'}
+            <Plus className="w-4 h-4 mr-2" />
+            Add Entry
           </button>
+        </form>
+      </div>
 
-          {useTimeRange ? (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Start Time</label>
-                <input
-                  type="time"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">End Time</label>
-                <input
-                  type="time"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
-                  required
-                />
-              </div>
-            </div>
-          ) : (
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Hours</label>
-              <input
-                type="number"
-                step="0.5"
-                value={hours}
-                onChange={(e) => setHours(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
-                required
-              />
-            </div>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Notes</label>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
-            rows={3}
-          />
-        </div>
-        <button
-          type="submit"
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Entry
-        </button>
-      </form>
-    </div>
+      <Notification 
+        message="Time entry added successfully!"
+        isVisible={showNotification}
+        onClose={() => setShowNotification(false)}
+      />
+    </>
   );
 }
