@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Clock, Plus } from 'lucide-react';
+import { Clock, Plus, AlertCircle } from 'lucide-react';
 import { useTimeEntryStore } from '../../store/timeEntryStore';
 import { useAuthStore } from '../../store/authStore';
 import { Notification } from '../common/Notification';
+import { format, subDays, isAfter, isBefore, parseISO } from 'date-fns';
 
 export function ManualEntry() {
   const [hours, setHours] = useState('');
@@ -12,9 +13,35 @@ export function ManualEntry() {
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('17:00');
   const [showNotification, setShowNotification] = useState(false);
+  const [dateError, setDateError] = useState<string | null>(null);
   
   const { addManualEntry } = useTimeEntryStore();
   const user = useAuthStore((state) => state.user);
+
+  // Calculate date restrictions
+  const today = new Date();
+  const minDate = format(subDays(today, 7), 'yyyy-MM-dd');
+  const maxDate = format(today, 'yyyy-MM-dd');
+
+  const validateDate = (selectedDate: string) => {
+    const dateObj = parseISO(selectedDate);
+    
+    if (isAfter(dateObj, today)) {
+      return "Cannot add entries for future dates";
+    }
+    
+    if (isBefore(dateObj, parseISO(minDate))) {
+      return "Cannot add entries older than 7 days";
+    }
+    
+    return null;
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = e.target.value;
+    setDate(newDate);
+    setDateError(validateDate(newDate));
+  };
 
   const calculateDuration = (start: string, end: string): number => {
     const [startHour, startMinute] = start.split(':').map(Number);
@@ -28,7 +55,7 @@ export function ManualEntry() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || dateError) return;
 
     const duration = useTimeRange 
       ? calculateDuration(startTime, endTime)
@@ -69,10 +96,20 @@ export function ManualEntry() {
             <input
               type="date"
               value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+              onChange={handleDateChange}
+              min={minDate}
+              max={maxDate}
+              className={`mt-1 block w-full rounded-md border ${
+                dateError ? 'border-red-300' : 'border-gray-300'
+              } shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200`}
               required
             />
+            {dateError && (
+              <div className="mt-1 text-sm text-red-600 flex items-center">
+                <AlertCircle className="w-4 h-4 mr-1" />
+                {dateError}
+              </div>
+            )}
           </div>
 
           <div>
@@ -133,7 +170,10 @@ export function ManualEntry() {
           </div>
           <button
             type="submit"
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            disabled={!!dateError}
+            className={`flex items-center px-4 py-2 bg-blue-600 text-white rounded-md ${
+              dateError ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
+            }`}
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Entry
