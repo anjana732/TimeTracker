@@ -15,6 +15,7 @@ export function Timer() {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [pausedTime, setPausedTime] = useState(0);
   const { activeEntry, startTimer, stopTimer } = useTimeEntryStore();
   const user = useAuthStore((state) => state.user);
 
@@ -36,6 +37,11 @@ export function Timer() {
 
   const handlePauseResume = () => {
     setIsPaused(!isPaused);
+    if (isPaused) {
+      setPausedTime(0);
+    } else {
+      setPausedTime(elapsedTime);
+    }
   };
 
   const handleStop = () => {
@@ -47,6 +53,7 @@ export function Timer() {
     setIsModalOpen(false);
     setElapsedTime(0);
     setIsPaused(false);
+    setPausedTime(0);
   };
 
   return (
